@@ -1,58 +1,90 @@
-﻿# GitHub Release Checklist
+# GitHub 上传清单
 
-## 1. Before Commit
+这份清单用于保证项目上传到 GitHub 后结构清晰、没有敏感信息，并且方便面试官快速理解项目价值。
 
-纭涓嶈鎻愪氦锛?
-- `.env`
-- `target/`
-- `.idea/`
-- `uploads/`
-- 鏈湴鏃ュ織鏂囦欢
+## 上传前检查
 
-宸茬粡閫氳繃 `.gitignore` 蹇界暐銆?
-## 2. Sensitive Information
-
-涓婁紶鍓嶆悳绱細
-
-```bash
-grep -R "password\\|123321\\|abc123456\\|Kuanfan" .
-```
-
-Windows PowerShell:
+1. 检查敏感信息：
 
 ```powershell
-Select-String -Path README.md,docs\\*.md,src\\main\\resources\\application.yaml,src\\main\\java\\com\\hmdp\\**\\*.java -Pattern "123321|abc123456|Kuanfan|183\\.169|E:\\\\hmdping"
+Select-String -Path README.md,docs\*.md,src\main\resources\application.yaml,src\main\java\com\hmdp\**\*.java -Pattern "password|123321|abc123456|Kuanfan|183\.169|E:\\hmdping"
 ```
 
-棰勬湡锛氭病鏈夌粨鏋溿€?
-## 3. Recommended Commit Structure
+如果只在本清单里命中示例关键字，可以忽略；如果在配置文件或 Java 代码里命中真实密码、服务器地址、本机路径，需要先替换为环境变量或示例值。
 
-寤鸿鍒?4 涓?commit锛?
+2. 检查 Git 状态：
+
+```powershell
+git status
+```
+
+工作区应该只包含你准备提交的文件。
+
+3. 检查文档编码：
+
+在 GitHub 页面打开 `README.md` 和 `docs` 目录，确认中文不是乱码。
+
+## 推荐提交顺序
+
+```powershell
+git add src pom.xml
+git commit -m "feat: add backend core services"
+
+git add agent-service
+git commit -m "feat: add fastapi agent service"
+
+git add docs README.md
+git commit -m "docs: add architecture and interview guide"
+
+git add .gitignore .env.example docker-compose.yml
+git commit -m "chore: add local development setup"
+```
+
+如果已经提交过，可以继续追加一次文档修复提交：
+
+```powershell
+git add README.md docs
+git commit -m "docs: fix chinese documentation encoding"
+```
+
+## 推送到 GitHub
+
+```powershell
+git remote -v
+git push -u origin main
+```
+
+如果提示远程仓库已有提交，先拉取并解决冲突：
+
+```powershell
+git pull origin main --allow-unrelated-histories
+```
+
+解决冲突后：
+
+```powershell
+git add README.md docs
+git commit -m "merge remote metadata"
+git push -u origin main
+```
+
+## GitHub 页面建议
+
+仓库描述可以写：
+
 ```text
-feat: stabilize feed and seckill base flow
-feat: add kafka async voucher order pipeline
-feat: add elasticsearch shop search and agent tool APIs
-docs: add architecture, deployment, and interview guide
+Local life service platform with Redis cache governance, Kafka async seckill, Elasticsearch search and FastAPI Agent orchestration.
 ```
 
-## 4. Repository Description
+推荐 Topics：
 
-GitHub description 寤鸿锛?
 ```text
-Local life backend platform with Redis cache governance, Kafka seckill pipeline, Elasticsearch search, and Agent tool orchestration.
+spring-boot redis kafka elasticsearch redisson lua fastapi agent java
 ```
 
-Topics 寤鸿锛?
-```text
-spring-boot redis kafka elasticsearch redisson lua fastapi agent
-```
+## 面试官快速阅读路径
 
-## 5. Interview Demo Script
-
-婕旂ず椤哄簭锛?
-1. 鎵撳紑 README锛岃椤圭洰瀹氫綅鍜屾灦鏋勫浘銆?2. 鎵撳紑 `docs/架构设计.md`锛岃缂撳瓨銆佺鏉€銆佹悳绱€丄gent 鍥涙潯涓荤嚎銆?3. 鎵撳紑 `VoucherOrderServiceImpl`锛岃 Lua + Kafka + Redisson + MySQL 鍏滃簳銆?4. 鎵撳紑 `CacheClient`锛岃缂撳瓨娌荤悊灏佽銆?5. 鎵撳紑 `ShopServiceImpl.search`锛岃 ES 鎼滅储銆?6. 鎵撳紑 `agent-service/main.py`锛岃 Agent 濡備綍璋冪敤 Java 宸ュ叿鎺ュ彛銆?
-## 6. Known Current Limits
-
-褰撳墠鐗堟湰涓轰簡绠€鍘嗗睍绀哄拰瀛︿範娓呮櫚锛屽仛浜嗚繖浜涘彇鑸嶏細
-
-- ES 鍚屾鏄墜鍔ㄦ帴鍙ｏ紝涓嶆槸 Canal 鎴?CDC 鑷姩鍚屾銆?- Kafka 澶辫触澶勭悊渚濊禆鏃ュ織鍜屾秷璐归噸璇曪紝杩樻湭鍔犳淇￠槦鍒椼€?- Agent 鏈嶅姟褰撳墠鏄鍒欐彁鍙栧叧閿瘝鐨勯鏋讹紝鍚庣画鍙帴 LangChain Tool Calling銆?- 鍓嶇椤甸潰涓嶆槸鏈閲嶇偣锛屽悗绔帴鍙ｅ拰鏋舵瀯璇存槑浼樺厛銆?
+1. 先看 `README.md`，了解项目定位和亮点。
+2. 再看 `docs/架构设计.md`，理解整体架构。
+3. 看 `docs/代码详解.md`，定位核心实现。
+4. 看 `docs/面试讲解.md`，快速抓住项目表达重点。
