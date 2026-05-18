@@ -1,16 +1,16 @@
-# Local Life Intelligent Recommendation and Service Orchestration
+﻿# Local Life Intelligent Recommendation and Service Orchestration
 
-一个围绕本地生活业务场景构建的后端项目，覆盖商户浏览、优惠券秒杀、Redis 缓存治理、关注 Feed 流、Elasticsearch 商户搜索，以及面向 Agent 的工具接口与 FastAPI 推荐服务骨架。
+涓€涓洿缁曟湰鍦扮敓娲讳笟鍔″満鏅瀯寤虹殑鍚庣椤圭洰锛岃鐩栧晢鎴锋祻瑙堛€佷紭鎯犲埜绉掓潃銆丷edis 缂撳瓨娌荤悊銆佸叧娉?Feed 娴併€丒lasticsearch 鍟嗘埛鎼滅储锛屼互鍙婇潰鍚?Agent 鐨勫伐鍏锋帴鍙ｄ笌 FastAPI 鎺ㄨ崘鏈嶅姟楠ㄦ灦銆?
 
-> 项目定位：面向 Java 后端与 Agent 应用开发岗位，重点展示高并发秒杀、缓存治理、搜索能力和服务编排思路。
+> 椤圭洰瀹氫綅锛氶潰鍚?Java 鍚庣涓?Agent 搴旂敤寮€鍙戝矖浣嶏紝閲嶇偣灞曠ず楂樺苟鍙戠鏉€銆佺紦瀛樻不鐞嗐€佹悳绱㈣兘鍔涘拰鏈嶅姟缂栨帓鎬濊矾銆?
 
 ## Highlights
 
-- **Redis 缓存治理**：商户详情支持缓存空值、互斥锁、逻辑过期三种方案，缓解缓存穿透和缓存击穿。
-- **异步秒杀链路**：Redis Lua 原子校验库存与一人一单，Kafka 异步削峰，Redisson 用户锁与数据库事务兜底。
-- **关注 Feed 流**：基于 Redis ZSet 实现推模式 Feed，支持滚动分页和重复 score 处理。
-- **商户搜索**：Elasticsearch 承载商户关键词、多条件检索，区别于 MySQL 模糊查询。
-- **Agent 工具接口**：Java 后端提供商户搜索、商户详情、优惠券、热门笔记等工具接口，FastAPI 服务负责编排推荐流程。
+- **Redis 缂撳瓨娌荤悊**锛氬晢鎴疯鎯呮敮鎸佺紦瀛樼┖鍊笺€佷簰鏂ラ攣銆侀€昏緫杩囨湡涓夌鏂规锛岀紦瑙ｇ紦瀛樼┛閫忓拰缂撳瓨鍑荤┛銆?
+- **寮傛绉掓潃閾捐矾**锛歊edis Lua 鍘熷瓙鏍￠獙搴撳瓨涓庝竴浜轰竴鍗曪紝Kafka 寮傛鍓婂嘲锛孯edisson 鐢ㄦ埛閿佷笌鏁版嵁搴撲簨鍔″厹搴曘€?
+- **鍏虫敞 Feed 娴?*锛氬熀浜?Redis ZSet 瀹炵幇鎺ㄦā寮?Feed锛屾敮鎸佹粴鍔ㄥ垎椤靛拰閲嶅 score 澶勭悊銆?
+- **鍟嗘埛鎼滅储**锛欵lasticsearch 鎵胯浇鍟嗘埛鍏抽敭璇嶃€佸鏉′欢妫€绱紝鍖哄埆浜?MySQL 妯＄硦鏌ヨ銆?
+- **Agent 宸ュ叿鎺ュ彛**锛欽ava 鍚庣鎻愪緵鍟嗘埛鎼滅储銆佸晢鎴疯鎯呫€佷紭鎯犲埜銆佺儹闂ㄧ瑪璁扮瓑宸ュ叿鎺ュ彛锛孎astAPI 鏈嶅姟璐熻矗缂栨帓鎺ㄨ崘娴佺▼銆?
 
 ## Architecture
 
@@ -29,7 +29,7 @@ FastAPI Agent Service
     |-- returns structured recommendation result
 ```
 
-更详细设计见 [docs/architecture.md](docs/architecture.md)。
+鏇磋缁嗚璁¤ [docs/架构设计.md](docs/架构设计.md)銆?
 
 ## Tech Stack
 
@@ -92,7 +92,7 @@ Test:
 ```bash
 curl -X POST http://127.0.0.1:8000/agent/recommend ^
   -H "Content-Type: application/json" ^
-  -d "{\"query\":\"找评分高的火锅店\"}"
+  -d "{\"query\":\"鎵捐瘎鍒嗛珮鐨勭伀閿呭簵\"}"
 ```
 
 ## Key APIs
@@ -107,22 +107,24 @@ curl -X POST http://127.0.0.1:8000/agent/recommend ^
 | Feed | GET | `/blog/of/follow` | Follow feed scroll query |
 | Agent Tools | GET | `/agent/tools/shops/search` | Tool endpoint for Agent |
 
-More details: [docs/api.md](docs/api.md).
+More details: [docs/接口文档.md](docs/接口文档.md).
 
 ## Interview Guide
 
-如果面试官问“这个项目最核心的设计是什么”，可以按这条线讲：
+濡傛灉闈㈣瘯瀹橀棶鈥滆繖涓」鐩渶鏍稿績鐨勮璁℃槸浠€涔堚€濓紝鍙互鎸夎繖鏉＄嚎璁诧細
 
-1. 本地生活业务包含商户、优惠券、用户互动和内容流。
-2. 商户详情高频访问，因此引入 Redis 缓存治理。
-3. 秒杀是高并发写场景，因此用 Lua 做原子校验，用 Kafka 异步削峰，用数据库事务兜底。
-4. 商户搜索从 MySQL like 升级到 Elasticsearch。
-5. 为 Agent 推荐服务提供工具接口，让自然语言推荐可以复用后端能力。
+1. 鏈湴鐢熸椿涓氬姟鍖呭惈鍟嗘埛銆佷紭鎯犲埜銆佺敤鎴蜂簰鍔ㄥ拰鍐呭娴併€?
+2. 鍟嗘埛璇︽儏楂橀璁块棶锛屽洜姝ゅ紩鍏?Redis 缂撳瓨娌荤悊銆?
+3. 绉掓潃鏄珮骞跺彂鍐欏満鏅紝鍥犳鐢?Lua 鍋氬師瀛愭牎楠岋紝鐢?Kafka 寮傛鍓婂嘲锛岀敤鏁版嵁搴撲簨鍔″厹搴曘€?
+4. 鍟嗘埛鎼滅储浠?MySQL like 鍗囩骇鍒?Elasticsearch銆?
+5. 涓?Agent 鎺ㄨ崘鏈嶅姟鎻愪緵宸ュ叿鎺ュ彛锛岃鑷劧璇█鎺ㄨ崘鍙互澶嶇敤鍚庣鑳藉姏銆?
 
-详见 [docs/interview-guide.md](docs/interview-guide.md)。
+璇﹁ [docs/面试讲解.md](docs/面试讲解.md)銆?
 
 ## Repository Notes
 
 - Do not commit local passwords. Use environment variables or `.env`.
 - `application.yaml` uses safe defaults and environment placeholders.
 - Generated files, IDE files, and build output are ignored by `.gitignore`.
+
+
