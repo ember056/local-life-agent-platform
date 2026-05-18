@@ -1,0 +1,126 @@
+# Deployment and Reproduction Guide
+
+## 1. Prerequisites
+
+- JDK 8 or 17
+- Maven 3.6+
+- Docker Desktop
+- Python 3.10+ for Agent service
+
+## 2. Start Middleware
+
+```bash
+docker compose up -d mysql redis zookeeper kafka elasticsearch
+```
+
+Check containers:
+
+```bash
+docker compose ps
+```
+
+Expected ports:
+
+- MySQL: `3306`
+- Redis: `6379`
+- Kafka: `9092`
+- Elasticsearch: `9200`
+
+## 3. Database
+
+The compose file mounts:
+
+```text
+src/main/resources/db/hmdp.sql
+```
+
+MySQL initializes the `hmdp` database automatically on first startup.
+
+If you already have a MySQL volume and want to re-import:
+
+```bash
+docker compose down -v
+docker compose up -d mysql
+```
+
+## 4. Spring Boot
+
+Default configuration is environment-variable based.
+
+Useful defaults:
+
+```text
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=root
+REDIS_PASSWORD=
+KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:9092
+ES_HOST=127.0.0.1
+ES_PORT=9200
+```
+
+Run:
+
+```bash
+mvn spring-boot:run
+```
+
+Or start `HmDianPingApplication` from IDEA.
+
+## 5. Elasticsearch Index
+
+After Spring Boot starts:
+
+```bash
+curl -X POST http://127.0.0.1:8081/shop/es/sync
+```
+
+Search:
+
+```bash
+curl "http://127.0.0.1:8081/shop/search?keyword=火锅&current=1"
+```
+
+## 6. Agent Service
+
+```bash
+cd agent-service
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+```
+
+Test:
+
+```bash
+curl -X POST http://127.0.0.1:8000/agent/recommend ^
+  -H "Content-Type: application/json" ^
+  -d "{\"query\":\"找评分高的火锅店\"}"
+```
+
+## 7. Common Problems
+
+### Maven dependency download is slow
+
+Use a stable Maven mirror or check local repository path. If Maven keeps waiting without output, it is usually dependency resolution, not Java syntax.
+
+### Kafka seckill returns order id but DB has no order
+
+Check:
+
+- Kafka container is running.
+- Topic `voucher-order` exists or auto-create is enabled.
+- Spring Boot log has Kafka consumer startup messages.
+
+### ES search fails
+
+Check:
+
+- `http://127.0.0.1:9200` is reachable.
+- `POST /shop/es/sync` has been called.
+
+### Redis lock or Lua script fails
+
+Check:
+
+- Redis is running.
+- Seckill stock key exists: `seckill:stock:{voucherId}`.
+- User is logged in and request has `authorization` header.

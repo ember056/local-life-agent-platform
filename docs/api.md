@@ -1,0 +1,150 @@
+# API Reference
+
+Base URL:
+
+```text
+http://127.0.0.1:8081
+```
+
+## User
+
+### Send Code
+
+```http
+POST /user/code?phone=13300000000
+```
+
+### Login
+
+```http
+POST /user/login
+Content-Type: application/json
+
+{
+  "phone": "13300000000",
+  "code": "123456"
+}
+```
+
+Response data is token. Put it into request header:
+
+```text
+authorization: <token>
+```
+
+## Shop
+
+### Query Shop Detail
+
+```http
+GET /shop/{id}
+```
+
+Uses Redis cache.
+
+### Sync Shops to Elasticsearch
+
+```http
+POST /shop/es/sync
+```
+
+Returns synced shop count.
+
+### Search Shops
+
+```http
+GET /shop/search?keyword=火锅&typeId=1&minScore=40&current=1
+```
+
+Query params:
+
+- `keyword`: optional, matches shop name and address.
+- `typeId`: optional.
+- `minScore`: optional, score is stored as integer, e.g. `45` means 4.5.
+- `current`: page number.
+
+## Voucher
+
+### Query Shop Vouchers
+
+```http
+GET /voucher/list/{shopId}
+```
+
+### Create Seckill Voucher
+
+```http
+POST /voucher/seckill
+Content-Type: application/json
+```
+
+### Seckill
+
+```http
+POST /voucher-order/seckill/{voucherId}
+authorization: <token>
+```
+
+Response returns order id immediately. Order is created asynchronously by Kafka consumer.
+
+## Blog and Feed
+
+### Hot Blogs
+
+```http
+GET /blog/hot?current=1
+```
+
+### Blog Detail
+
+```http
+GET /blog/{id}
+```
+
+### Like Blog
+
+```http
+PUT /blog/like/{id}
+authorization: <token>
+```
+
+### Blog Like Top5
+
+```http
+GET /blog/likes/{id}
+```
+
+### Follow Feed
+
+```http
+GET /blog/of/follow?lastId=9223372036854775807&offset=0
+authorization: <token>
+```
+
+## Agent Tools
+
+These endpoints are designed for Agent service orchestration.
+
+### Search Shops Tool
+
+```http
+GET /agent/tools/shops/search?keyword=火锅&minScore=40
+```
+
+### Shop Detail Tool
+
+```http
+GET /agent/tools/shops/detail?id=1
+```
+
+### Voucher Tool
+
+```http
+GET /agent/tools/vouchers?shopId=1
+```
+
+### Hot Blogs Tool
+
+```http
+GET /agent/tools/blogs/hot?current=1
+```
